@@ -19,7 +19,7 @@
     <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak tree</uri>
       <name>oak_tree</name>
-      <pose>15.0 5.5 0 0 0 0</pose>
+      <pose>5.0 5.5 0 0 0 0</pose>
       <static>true</static>
     </include>
 

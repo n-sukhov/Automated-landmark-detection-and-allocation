@@ -2,17 +2,31 @@ from launch import LaunchDescription
 from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 from launch.substitutions import Command
+from ament_index_python.packages import get_package_prefix
 import os
 
 def generate_launch_description():
-    ros2_ws_path = os.path.expanduser('~/ros2_ws')
-    urdf_path = os.path.join(ros2_ws_path, 'src/yolo_landmark/urdf/robot.sdf')
-    rviz_config_path = os.path.join(ros2_ws_path, 'src/yolo_landmark/config/robot.rviz')
-    world_path = os.path.join(ros2_ws_path, 'src/yolo_landmark/worlds/world.world')
+    main_path = get_package_prefix('yolo_landmark').replace('install', 'src')
+    sdf_path = os.path.join(main_path, 'sdf/robot.sdf')
+    rviz_config_path = os.path.join(main_path, 'config/robot.rviz')
+    world_path = os.path.join(main_path, 'worlds/world.world')
+    urdf_path = os.path.join(main_path, 'urdf/robot.urdf')
+    dd_conf_path = os.path.join(main_path, 'config/diff_drive.yaml')
 
     return LaunchDescription([
         ExecuteProcess(
             cmd=['gz', 'sim', '-r', world_path],
+            output='screen'
+        ),
+
+        Node(
+            package='ros_gz_sim',
+            executable='create',
+            arguments=[
+                '-file', sdf_path,
+                '-name', 'yolo_robot',
+                '-x', '0', '-y', '0', '-z', '0.1'
+            ],
             output='screen'
         ),
 
@@ -36,17 +50,6 @@ def generate_launch_description():
             }]
         ),
 
-        Node(
-            package='ros_gz_sim',
-            executable='create',
-            arguments=[
-                '-topic', '/robot_description',
-                '-name', 'yolo_robot',
-                '-x', '0', '-y', '0', '-z', '0.1'
-            ],
-            output='screen'
-        ),
-        
         Node(
             package='ros_gz_bridge',
             executable='parameter_bridge',
@@ -80,7 +83,7 @@ def generate_launch_description():
             ],
             parameters=[{'use_sim_time': True}]
         ),
-        
+
         Node(
             package='rviz2',
             executable='rviz2',
