@@ -9,24 +9,8 @@
       </gz-gui>
       <topic>/camera/image_raw</topic>
     </plugin>
-    <plugin name='Teleop' filename='Teleop'>
-      <ignition-gui>
-        <property key='x' type='double'>0</property>
-        <property key='y' type='double'>0</property>
-        <property key='width' type='double'>400</property>
-        <property key='height' type='double'>900</property>
-        <property key='state' type='string'>docked</property>
-      </ignition-gui>
-      <topic>/cmd_vel</topic>
-    </plugin>
 
     <plugin name='gz_ros2_control::GazeboSimROS2ControlPlugin' filename='gz_ros2_control-system'>
-      <ros>
-        <namespace/>
-      </ros>
-      <parameters>/opt/ros/jazzy/share/gz_ros2_control_demos/config/diff_drive_controller.yaml</parameters>
-    </plugin>
-<plugin name='gz_ros2_control::GazeboSimROS2ControlPlugin' filename='gz_ros2_control-system'>
       <ros>
         <namespace></namespace>
       </ros>

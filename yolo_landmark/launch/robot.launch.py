@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, ExecuteProcess, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
@@ -45,7 +45,7 @@ def generate_launch_description():
             '-x', '0', '-y', '0', '-z', '0.1'
         ],
         output='screen',
-        parameters=[{'use_sim_time': True}]
+        parameters=[use_sim_time]
     )
 
     robot_controllers = PathJoinSubstitution(
@@ -125,7 +125,7 @@ def generate_launch_description():
             ],
             output='screen',
             parameters=[{
-                'use_sim_time': True,
+                'use_sim_time': use_sim_time,
                 'qos_overrides./camera/image_raw.reliability': 'reliable',
                 'qos_overrides./camera_info.reliability': 'reliable'
             }]
@@ -138,7 +138,7 @@ def generate_launch_description():
             remappings=[
                 ('/image_raw', '/camera/image_raw')
             ],
-            parameters=[{'use_sim_time': True}]
+            parameters=[use_sim_time]
         ),
 
         Node(
@@ -147,6 +147,6 @@ def generate_launch_description():
             name='rviz2',
             arguments=['-d', rviz_config_path],
             output='screen',
-            parameters=[{'use_sim_time': True}]
+            parameters=[use_sim_time]
         )
     ])
