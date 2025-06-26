@@ -1,55 +1,121 @@
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, ExecuteProcess, RegisterEventHandler
+from launch.event_handlers import OnProcessExit
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
-from launch.substitutions import Command
-from ament_index_python.packages import get_package_prefix
-import os
+from launch_ros.substitutions import FindPackageShare
+
 
 def generate_launch_description():
-    main_path = get_package_prefix('yolo_landmark').replace('install', 'src')
-    sdf_path = os.path.join(main_path, 'sdf/robot.sdf')
-    rviz_config_path = os.path.join(main_path, 'config/robot.rviz')
-    world_path = os.path.join(main_path, 'worlds/world.world')
-    urdf_path = os.path.join(main_path, 'urdf/robot.urdf')
-    dd_conf_path = os.path.join(main_path, 'config/diff_drive.yaml')
+    pkg_share = FindPackageShare(package='yolo_landmark')
+    
+    sdf_path = PathJoinSubstitution([pkg_share, 'sdf', 'robot.sdf'])
+    rviz_config_path = PathJoinSubstitution([pkg_share, 'config', 'robot.rviz'])
+    world_path = PathJoinSubstitution([pkg_share, 'worlds', 'world.world'])
 
-    return LaunchDescription([
-        ExecuteProcess(
-            cmd=['gz', 'sim', '-r', world_path],
-            output='screen'
-        ),
+    def robot_state_publisher(context):
+        robot_description_content = Command([
+            PathJoinSubstitution([FindExecutable(name='xacro')]),
+            ' ',
+            PathJoinSubstitution([
+                FindPackageShare('yolo_landmark'),
+                'urdf',
+                'test_diff_drive.xacro.urdf'
+            ]),
+        ])
 
-        Node(
-            package='ros_gz_sim',
-            executable='create',
-            arguments=[
-                '-file', sdf_path,
-                '-name', 'yolo_robot',
-                '-x', '0', '-y', '0', '-z', '0.1'
-            ],
-            output='screen'
-        ),
-
-        Node(
-            package='joint_state_publisher',
-            executable='joint_state_publisher',
-            name='joint_state_publisher',
-            output='screen',
-            parameters=[{'source_list': ['joint_states']}]
-        ),
-
-        Node(
+        robot_description = {'robot_description': robot_description_content}
+        node_robot_state_publisher = Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
-            name='robot_state_publisher',
             output='screen',
-            parameters=[{
-                'robot_description': Command(['xacro ', urdf_path]),
-                'publish_frequency': 30.0,
-                'use_sim_time': True 
-            }]
+            parameters=[robot_description]
+        )
+        return [node_robot_state_publisher]
+    
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+
+    gz_spawn_entity = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=[
+            '-file', sdf_path,
+            '-name', 'yolo_robot',
+            '-x', '0', '-y', '0', '-z', '0.1'
+        ],
+        output='screen',
+        parameters=[{'use_sim_time': True}]
+    )
+
+    robot_controllers = PathJoinSubstitution(
+        [
+            FindPackageShare('yolo_landmark'),
+            'config',
+            'diff_drive_controller.yaml',
+        ]
+    )
+
+    joint_state_broadcaster_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['joint_state_broadcaster'],
+    )
+
+    diff_drive_base_controller_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=[
+            'diff_drive_base_controller',
+            '--param-file',
+            robot_controllers,
+            ],
+    )
+
+    return LaunchDescription([
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                [PathJoinSubstitution([FindPackageShare('ros_gz_sim'),
+                                       'launch',
+                                       'gz_sim.launch.py'])]),
+            launch_arguments=[('gz_args', [' -r -v 1 ', world_path])]
         ),
 
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=gz_spawn_entity,
+                on_exit=[joint_state_broadcaster_spawner],
+            )
+        ),
+
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=joint_state_broadcaster_spawner,
+                on_exit=[diff_drive_base_controller_spawner],
+            )
+        ),
+
+        Node(
+            package='ros_gz_bridge',
+            executable='parameter_bridge',
+            arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+            output='screen'
+        ),
+
+        gz_spawn_entity,
+
+        DeclareLaunchArgument(
+            'use_sim_time',
+            default_value=use_sim_time,
+            description='If true, use simulated clock'),
+
+        DeclareLaunchArgument(
+            'description_format',
+            default_value='urdf',
+            description='Robot description format to use, urdf or sdf'),
+
+        OpaqueFunction(function=robot_state_publisher),
+        
         Node(
             package='ros_gz_bridge',
             executable='parameter_bridge',
@@ -63,15 +129,6 @@ def generate_launch_description():
                 'qos_overrides./camera/image_raw.reliability': 'reliable',
                 'qos_overrides./camera_info.reliability': 'reliable'
             }]
-        ),
-
-        Node(
-            package='ros_gz_bridge',
-            executable='parameter_bridge',
-            arguments=[
-                '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist'
-            ],
-            output='screen'
         ),
 
         Node(
