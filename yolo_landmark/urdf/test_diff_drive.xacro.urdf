@@ -14,8 +14,8 @@
   <material name="white">
     <color rgba="1 1 1 1.0"/>
   </material>
-  <!-- Base Link -->
-  <link name="chassis">
+
+  <link name="base_link">
     <collision>
       <origin xyz="-0.151427 -0 0.5" rpy="0 0 0"/>
       <geometry>
@@ -44,17 +44,17 @@
     </inertial>
   </link>
 
-  <joint name="camera_joint" type="fixed">
-    <parent link="chassis" />
-    <child link="camera_link" />
-    <origin xyz="1.0 0 0.8" rpy="0 0 0" />
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="lidar_link" />
+    <origin xyz="0.0 0 0.9" rpy="0 0 0" />
   </joint>
 
-  <link name="camera_link">
+  <link name="lidar_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.5 0.5 0.5" />
+        <cylinder radius="0.2" length="0.3"/>
       </geometry>
       <material name="grey">
         <color rgba="0.625 0.625 0.625 1" />
@@ -64,7 +64,44 @@
     <collision>
       <origin xyz="0 0 0.095" rpy="0 0 0" />
       <geometry>
-        <box size="0.5 0.5 0.5" />
+        <cylinder radius="0.2" length="0.3"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.1"/>
+      <inertia
+        ixx="0.026164"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.016519"
+        iyz="0.0"
+        izz="0.081014"/>
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="camera_link" />
+    <origin xyz="1.0 0 0.55" rpy="0 0 0" />
+  </joint>
+
+  <link name="camera_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.3 0.2"/>
+      </geometry>
+      <material name="grey">
+        <color rgba="0.625 0.625 0.625 1" />
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0.095" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.3 0.2"/>
       </geometry>
     </collision>
 
@@ -83,13 +120,12 @@
 
   <joint name="left_wheel_joint" type="continuous">
     <origin xyz="0.554283 0.625029 0.3" rpy="-1.5707 0 0"/>
-    <parent link="chassis"/>
+    <parent link="base_link"/>
     <child link="left_wheel"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2"/>
   </joint>
 
-  <!-- left wheel Link -->
   <link name="left_wheel">
     <collision>
       <geometry>
@@ -117,13 +153,12 @@
 
   <joint name="right_wheel_joint" type="continuous">
     <origin xyz="0.554283 -0.625029 0.3" rpy="-1.5707 0 0"/>
-    <parent link="chassis"/>
+    <parent link="base_link"/>
     <child link="right_wheel"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="0.2"/>
   </joint>
 
-  <!-- right wheel Link -->
   <link name="right_wheel">
     <collision>
       <geometry>
@@ -151,11 +186,10 @@
 
   <joint name="caster_joint" type="fixed">
     <origin xyz="-0.957138 -0 0.2" rpy="0 0 0"/>
-    <parent link="chassis"/>
+    <parent link="base_link"/>
     <child link="caster"/>
   </joint>
 
-  <!-- caster frontal wheel Link -->
   <link name="caster">
     <collision>
       <geometry>
@@ -211,7 +245,7 @@
       <ros>
         <namespace>$(arg namespace)</namespace>
       </ros>
-      <parameters>$(find gz_ros2_control_demos)/config/diff_drive_controller.yaml</parameters>
+      <parameters>$(find yolo_landmark)/config/diff_drive_controller.yaml</parameters>
     </plugin>
   </gazebo>
 

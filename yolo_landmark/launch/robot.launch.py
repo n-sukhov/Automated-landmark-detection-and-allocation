@@ -140,6 +140,18 @@ def generate_launch_description():
             ],
             parameters=[use_sim_time]
         ),
+        
+        Node(
+            package='ros_gz_bridge',
+            executable='parameter_bridge',
+            arguments=['/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan'],
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'qos_overrides./scan.reliability': 'best_effort',
+                'qos_overrides./scan.depth': 1
+            }]
+        ),
 
         Node(
             package='rviz2',
@@ -148,5 +160,24 @@ def generate_launch_description():
             arguments=['-d', rviz_config_path],
             output='screen',
             parameters=[use_sim_time]
+        ),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('nav2_bringup'),
+                    'launch',
+                    'bringup_launch.py'
+                ])
+            ]),
+            launch_arguments={
+                'params_file': PathJoinSubstitution([
+                    pkg_share, 'nav2_params', 'nav2_params.yaml'
+                ]),
+                'slam': 'True',
+                'use_sim_time': use_sim_time,
+                'autostart': 'True'
+            }.items()
         )
+
     ])

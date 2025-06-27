@@ -17,8 +17,7 @@
       <parameters>/opt/ros/jazzy/share/gz_ros2_control_demos/config/diff_drive_controller.yaml</parameters>
     </plugin>
 
-    <!-- Base Link -->
-    <link name="chassis">
+    <link name="base_link">
       <pose>-0.151427 0 0.5 0 0 0</pose>
       <inertial>
         <pose>-0.151427 0 0.5 0 0 0</pose>
@@ -33,7 +32,7 @@
         </inertia>
       </inertial>
 
-      <visual name="chassis_visual">
+      <visual name="base_link_visual">
         <pose>-0.151427 0 0.5 0 0 0</pose>
         <geometry>
           <box>
@@ -46,7 +45,7 @@
         </material>
       </visual>
 
-      <collision name="chassis_collision">
+      <collision name="base_link_collision">
         <pose>-0.151427 0 0.5 0 0 0</pose>
         <geometry>
           <box>
@@ -56,10 +55,89 @@
       </collision>
     </link>
 
-    <!-- Camera -->
+    <joint name="lidar_joint" type="fixed">
+      <pose relative_to='base_link'>0 0 0.9 0 0  0</pose>
+      <parent>base_link</parent>
+      <child>lidar_link</child>
+    </joint>
+
+    <link name="lidar_link">
+      <pose relative_to='lidar_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.02</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.02</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.02</izz>
+        </inertia>
+      </inertial>
+
+      <visual name="lidar_visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.2</radius>
+            <length>0.3</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.625 0.625 0.625 1</ambient>
+          <diffuse>0.625 0.625 0.625 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="lidar_collision">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.2</radius>
+            <length>0.3</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <sensor name='lidar' type='gpu_lidar'>
+        <pose>0 0 0.9 0 0 0</pose>
+        <topic>/scan</topic>
+        <update_rate>30</update_rate>
+        <enable_metrics>false</enable_metrics>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>360</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>6.2800000000000002</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>1</samples>
+              <min_angle>0</min_angle>
+              <max_angle>0</max_angle>
+              <resolution>1</resolution>
+            </vertical>
+          </scan>
+          <range>
+            <min>1.0000000000000001e-05</min>
+            <max>20</max>
+            <resolution>0.014999999999999999</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+          <visibility_mask>4294967295</visibility_mask>
+        </lidar>
+      </sensor>
+    </link>
+
     <joint name="camera_joint" type="fixed">
-      <pose relative_to='chassis'>1.0 0 0.8 0 0  0</pose>
-      <parent>chassis</parent>
+      <pose relative_to='base_link'>1.0 0 0.55 0 0  0</pose>
+      <parent>base_link</parent>
       <child>camera_link</child>
     </joint>
 
@@ -82,7 +160,7 @@
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.5 0.5 0.5</size>
+            <size>0.3 0.3 0.2</size>
           </box>
         </geometry>
         <material>
@@ -92,16 +170,16 @@
       </visual>
 
       <collision name="camera_collision">
-        <pose>0 0 0.095 0 0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.5 0.5 0.5</size>
+            <size>0.3 0.3 0.2</size>
           </box>
         </geometry>
       </collision>
 
       <sensor name='camera' type='camera'>
-        <pose>0.1 0 0.1 0 0 0</pose>
+        <pose>0.1 0 0.55 0 0 0</pose>
         <topic>/camera/image_raw</topic>
         <update_rate>30</update_rate>
         <enable_metrics>false</enable_metrics>
@@ -149,10 +227,9 @@
       </sensor>
     </link>
 
-    <!-- Left Wheel -->
     <joint name="left_wheel_joint" type="revolute">
-      <pose relative_to='chassis'>0.554283 0.625029 0.3 -1.5707 0 0</pose>
-      <parent>chassis</parent>
+      <pose relative_to='base_link'>0.554283 0.625029 0.3 -1.5707 0 0</pose>
+      <parent>base_link</parent>
       <child>left_wheel</child>
       <axis>
         <xyz>0 0 1</xyz>
@@ -201,10 +278,9 @@
       </collision>
     </link>
 
-    <!-- Right Wheel -->
     <joint name="right_wheel_joint" type="revolute">
-      <pose relative_to='chassis'>0.554283 -0.625029 0.3 -1.5707 0 0</pose>
-      <parent>chassis</parent>
+      <pose relative_to='base_link'>0.554283 -0.625029 0.3 -1.5707 0 0</pose>
+      <parent>base_link</parent>
       <child>right_wheel</child>
       <axis>
         <xyz>0 0 1</xyz>
@@ -253,10 +329,9 @@
       </collision>
     </link>
 
-    <!-- Caster Wheel -->
     <joint name="caster_joint" type="fixed">
-      <pose relative_to='chassis'>-0.957138 0 0.2 0 0 0</pose>
-      <parent>chassis</parent>
+      <pose relative_to='base_link'>-0.957138 0 0.2 0 0 0</pose>
+      <parent>base_link</parent>
       <child>caster</child>
     </joint>
 
