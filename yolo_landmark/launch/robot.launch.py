@@ -6,13 +6,14 @@ from launch.substitutions import Command, FindExecutable, LaunchConfiguration, P
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-
 def generate_launch_description():
     pkg_share = FindPackageShare(package='yolo_landmark')
     
     sdf_path = PathJoinSubstitution([pkg_share, 'sdf', 'robot.sdf'])
     rviz_config_path = PathJoinSubstitution([pkg_share, 'config', 'robot.rviz'])
     world_path = PathJoinSubstitution([pkg_share, 'worlds', 'world.world'])
+    slam_params_file = PathJoinSubstitution([pkg_share, 'nav2_params', 'slam_toolbox_params.yaml'])
+    nav2_params_file = PathJoinSubstitution([pkg_share, 'nav2_params', 'nav2_params.yaml'])
 
     def robot_state_publisher(context):
         robot_description_content = Command([
@@ -147,9 +148,9 @@ def generate_launch_description():
             arguments=['/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan'],
             output='screen',
             parameters=[{
-                'use_sim_time': use_sim_time,
+                'use_sim_time': use_sim_time,   
                 'qos_overrides./scan.reliability': 'reliable',
-                'qos_overrides./scan.depth': 3
+                'qos_overrides./scan.depth': 10
             }]
         ),
 
@@ -160,6 +161,21 @@ def generate_launch_description():
             arguments=['0', '0', '0.9', '0', '0', '0', 'base_link', 'yolo_robot/lidar_link/lidar'],
             parameters=[{'use_sim_time': use_sim_time}]
         ),
+    
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('slam_toolbox'),
+                    'launch',
+                    'online_async_launch.py'
+                ])
+            ]),
+            launch_arguments={
+                'slam_params_file': PathJoinSubstitution([
+                    pkg_share, 'nav2_params', 'mapper_params_online_async.yaml'
+                ]),
+                'use_sim_time': 'true'}.items(),
+        ),
 
         Node(
             package='rviz2',
@@ -168,23 +184,5 @@ def generate_launch_description():
             arguments=['-d', rviz_config_path],
             output='screen',
             parameters=[use_sim_time],
-        ),
-
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([
-                PathJoinSubstitution([
-                    FindPackageShare('nav2_bringup'),
-                    'launch',
-                    'bringup_launch.py'
-                ])
-            ]),
-            launch_arguments={
-                'params_file': PathJoinSubstitution([
-                    pkg_share, 'nav2_params', 'nav2_params.yaml'
-                ]),
-                'slam': 'True',
-                'use_sim_time': use_sim_time,
-                'autostart': 'True'
-            }.items()
         )
     ])
