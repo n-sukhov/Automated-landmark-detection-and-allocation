@@ -106,6 +106,7 @@
         <update_rate>30</update_rate>
         <enable_metrics>false</enable_metrics>
         <lidar>
+          <frame_id></frame_id>
           <scan>
             <horizontal>
               <samples>360</samples>
@@ -339,7 +340,7 @@
       <pose relative_to='caster_joint'>0 0 0 0 0 0</pose>
       <inertial>
         <pose>-0.957138 0 0.2 0 0 0</pose>
-        <mass>0.005</mass>
+        <mass>0.1</mass>
         <inertia>
           <ixx>0.1</ixx>
           <ixy>0.0</ixy>

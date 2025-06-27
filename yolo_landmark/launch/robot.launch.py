@@ -148,9 +148,17 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time,
-                'qos_overrides./scan.reliability': 'best_effort',
-                'qos_overrides./scan.depth': 1
+                'qos_overrides./scan.reliability': 'reliable',
+                'qos_overrides./scan.depth': 3
             }]
+        ),
+
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='lidar_tf_publisher',
+            arguments=['0', '0', '0.9', '0', '0', '0', 'base_link', 'yolo_robot/lidar_link/lidar'],
+            parameters=[{'use_sim_time': use_sim_time}]
         ),
 
         Node(
@@ -159,7 +167,7 @@ def generate_launch_description():
             name='rviz2',
             arguments=['-d', rviz_config_path],
             output='screen',
-            parameters=[use_sim_time]
+            parameters=[use_sim_time],
         ),
 
         IncludeLaunchDescription(
@@ -179,5 +187,4 @@ def generate_launch_description():
                 'autostart': 'True'
             }.items()
         )
-
     ])
