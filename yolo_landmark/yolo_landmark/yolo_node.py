@@ -1,29 +1,57 @@
 import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, LaserScan
+from geometry_msgs.msg import PointStamped
 from ultralytics import YOLO
+import math
 
 class YOLOLandmarkNode(Node):
     def __init__(self):
         super().__init__('yolo_landmark_node')
         self.model = YOLO('yolov8n.pt')
         self.bridge = CvBridge()
+
         self.subscription = self.create_subscription(
             Image,
             '/image_raw',
             self.image_callback,
             10)
+        
         self.annotated_pub = self.create_publisher(
             Image,
             '/yolo/annotated_image',
             10)
+        
+        self.scan_subscription = self.create_subscription(
+            LaserScan,
+            '/scan',
+            self.scan_callback,
+            10)
+        
+        self.point_pub = self.create_publisher(
+            PointStamped,
+            '/yolo/object_position',
+            10)
+
+        self.last_scan = None
         self.get_logger().info('YOLO Landmark Node has been started')
+
+    def scan_callback(self, msg):
+        self.last_scan = msg
 
     def image_callback(self, msg):
         try:
+            if self.last_scan is None:
+                self.get_logger().warn('No scan data yet.')
+                return
+             
             cv_image = self.bridge.imgmsg_to_cv2(msg)
             results = self.model(cv_image, verbose=False)
+            fov_rad = 1.047
+
+
+
             annotated_frame = results[0].plot()
             annotated_msg = self.bridge.cv2_to_imgmsg(annotated_frame)
             self.annotated_pub.publish(annotated_msg)
