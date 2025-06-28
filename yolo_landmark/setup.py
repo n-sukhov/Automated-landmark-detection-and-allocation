@@ -28,7 +28,8 @@ setup(
     entry_points={
         'console_scripts': [
             'yolo_node = yolo_landmark.yolo_node:main',
-            'teleop = yolo_landmark.teleop:main'
+            'teleop = yolo_landmark.teleop:main',
+            'save_markers = yolo_landmark.save_markers:main',
         ],
     },
 )
