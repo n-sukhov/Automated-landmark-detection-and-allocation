@@ -27,22 +27,22 @@
     open_loop: false
     enable_odom_tf: true
 
-    cmd_vel_timeout: 0.5
+    cmd_vel_timeout: 0.2
     use_stamped_vel: true
 
     linear.x.has_velocity_limits: true
     linear.x.has_acceleration_limits: true
-    linear.x.max_velocity: 10.0
-    linear.x.min_velocity: -10.0
-    linear.x.max_acceleration: 1.0
+    linear.x.max_velocity: 3.0
+    linear.x.min_velocity: -3.0
+    linear.x.max_acceleration: 0.5  
     linear.x.max_jerk: .NAN
     linear.x.min_jerk: .NAN
 
     angular.z.has_velocity_limits: true
     angular.z.has_acceleration_limits: true
-    angular.z.max_velocity: 10.0
-    angular.z.min_velocity: -10.0
-    angular.z.max_acceleration: 1.0
-    angular.z.min_acceleration: -1.0
+    angular.z.max_velocity: 3.0
+    angular.z.min_velocity: -3.0
+    angular.z.max_acceleration: 0.5
+    angular.z.min_acceleration: -0.5
     angular.z.max_jerk: .NAN
     angular.z.min_jerk: .NAN

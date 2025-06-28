@@ -11,7 +11,7 @@ class TeleopKeyboard(Node):
         self.publisher = self.create_publisher(TwistStamped, '/diff_drive_base_controller/cmd_vel', 10)
         self.settings = termios.tcgetattr(sys.stdin)
         self.speed = 5.0
-        self.turn = 16.0
+        self.turn = 10.0
         self.get_logger().info("Control: WASD + QE, SPACE - stop")
 
     def get_key(self):
