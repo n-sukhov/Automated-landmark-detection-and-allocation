@@ -156,13 +156,6 @@ def generate_launch_description():
             ],
             parameters=[use_sim_time]
         ),
-
-        Node(
-            package='yolo_landmark',
-            executable='make_map',
-            name='make_map',
-            parameters=[use_sim_time]
-        ),
         
         Node(
             package='ros_gz_bridge',
