@@ -12,8 +12,8 @@ def generate_launch_description():
     sdf_path = PathJoinSubstitution([pkg_share, 'sdf', 'robot.sdf'])
     rviz_config_path = PathJoinSubstitution([pkg_share, 'config', 'robot.rviz'])
     world_path = PathJoinSubstitution([pkg_share, 'worlds', 'world.world'])
-    slam_params_file = PathJoinSubstitution([pkg_share, 'nav2_params', 'slam_toolbox_params.yaml'])
-    nav2_params_file = PathJoinSubstitution([pkg_share, 'nav2_params', 'nav2_params.yaml'])
+    slam_params_file = PathJoinSubstitution([pkg_share, 'config', 'slam_toolbox_params.yaml'])
+    nav2_params_file = PathJoinSubstitution([pkg_share, 'config', 'nav2_params.yaml'])
 
     def robot_state_publisher(context):
         robot_description_content = Command([
@@ -177,12 +177,26 @@ def generate_launch_description():
                 'use_sim_time': 'true'}.items(),
         ),
 
-        Node(
+        Node(   
             package='rviz2',
             executable='rviz2',
             name='rviz2',
             arguments=['-d', rviz_config_path],
             output='screen',
             parameters=[use_sim_time],
+        ),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([
+                    FindPackageShare('slam_toolbox'),
+                    'launch',
+                    'online_async_launch.py'
+                ])
+            ]),
+            launch_arguments={
+                'slam_params_file': slam_params_file,
+                'use_sim_time': use_sim_time
+            }.items(),
         )
     ])

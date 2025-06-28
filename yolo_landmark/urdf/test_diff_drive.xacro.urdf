@@ -17,44 +17,44 @@
 
   <link name="base_link">
     <collision>
-      <origin xyz="-0.151427 -0 0.5" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="2.01142 1 0.568726"/>
+        <box size="0.8 0.4 0.2"/>
       </geometry>
     </collision>
 
     <visual>
-      <origin xyz="-0.151427 -0 0.5" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="2.01142 1 0.568726"/>
+        <box size="0.8 0.4 0.2"/>
       </geometry>
       <material name="orange"/>
     </visual>
 
     <inertial>
-      <origin xyz="-0.151427 -0 0.5" rpy="0 0 0"/>
-      <mass value="1.14395"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="3"/>
       <inertia
-        ixx="0.126164"
+        ixx="0.05"
         ixy="0.0"
         ixz="0.0"
-        iyy="0.416519"
+        iyy="0.17"
         iyz="0.0"
-        izz="0.481014"/>
+        izz="0.20"/>
     </inertial>
   </link>
 
   <joint name="lidar_joint" type="fixed">
     <parent link="base_link" />
     <child link="lidar_link" />
-    <origin xyz="0.0 0 0.9" rpy="0 0 0" />
+    <origin xyz="0.0 0 0.15" rpy="0 0 0" />
   </joint>
 
   <link name="lidar_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.2" length="0.3"/>
+        <cylinder radius="0.1" length="0.1"/>
       </geometry>
       <material name="grey">
         <color rgba="0.625 0.625 0.625 1" />
@@ -64,13 +64,13 @@
     <collision>
       <origin xyz="0 0 0.095" rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.2" length="0.3"/>
+        <cylinder radius="0.1" length="0.1"/>
       </geometry>
     </collision>
 
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="0.1"/>
+      <mass value="0.2"/>
       <inertia
         ixx="0.026164"
         ixy="0.0"
@@ -84,14 +84,14 @@
   <joint name="camera_joint" type="fixed">
     <parent link="base_link" />
     <child link="camera_link" />
-    <origin xyz="1.0 0 0.55" rpy="0 0 0" />
+    <origin xyz="0.41 0 0" rpy="0 0 0" />
   </joint>
 
   <link name="camera_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.3 0.3 0.2"/>
+        <box size="0.2 0.2 0.2"/>
       </geometry>
       <material name="grey">
         <color rgba="0.625 0.625 0.625 1" />
@@ -99,27 +99,27 @@
     </visual>
 
     <collision>
-      <origin xyz="0 0 0.095" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.3 0.3 0.2"/>
+        <box size="0.2 0.2 0.2"/>
       </geometry>
     </collision>
 
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="0.1"/>
+      <mass value="0.3"/>
       <inertia
-        ixx="0.026164"
+        ixx="0.05"
         ixy="0.0"
         ixz="0.0"
-        iyy="0.016519"
+        iyy="0.05"
         iyz="0.0"
-        izz="0.081014"/>
+        izz="0.05"/>
     </inertial>
   </link>
 
   <joint name="left_wheel_joint" type="continuous">
-    <origin xyz="0.554283 0.625029 0.3" rpy="-1.5707 0 0"/>
+    <origin xyz="0.2 0.25 -0.1" rpy="-1.5707 0 0"/>
     <parent link="base_link"/>
     <child link="left_wheel"/>
     <axis xyz="0 0 1"/>
@@ -129,30 +129,31 @@
   <link name="left_wheel">
     <collision>
       <geometry>
-        <sphere radius="0.3"/>
+        <cylinder radius="0.1" length="0.1"/>
       </geometry>
     </collision>
 
     <visual>
       <geometry>
-        <sphere radius="0.3"/>
+        <cylinder radius="0.1" length="0.1"/>
       </geometry>
       <material name="black"/>
     </visual>
 
     <inertial>
-      <mass value="2"/>
-      <inertia ixx="0.145833"
-               ixy="0.0"
-               ixz="0.0"
-               iyy="0.145833"
-               iyz="0.0"
-               izz="0.125"/>
+      <mass value="0.3"/>
+      <inertia
+        ixx="0.001"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.001"
+        iyz="0.0"
+        izz="0.0015"/>
     </inertial>
   </link>
 
   <joint name="right_wheel_joint" type="continuous">
-    <origin xyz="0.554283 -0.625029 0.3" rpy="-1.5707 0 0"/>
+    <origin xyz="0.2 -0.25 -0.1" rpy="-1.5707 0 0"/>
     <parent link="base_link"/>
     <child link="right_wheel"/>
     <axis xyz="0 0 1"/>
@@ -162,30 +163,31 @@
   <link name="right_wheel">
     <collision>
       <geometry>
-        <sphere radius="0.3"/>
+        <cylinder radius="0.1" length="0.1"/>
       </geometry>
     </collision>
 
     <visual>
       <geometry>
-        <sphere radius="0.3"/>
+        <cylinder radius="0.1" length="0.1"/>
       </geometry>
       <material name="black"/>
     </visual>
 
     <inertial>
-      <mass value="2"/>
-      <inertia ixx="0.145833"
-               ixy="0.0"
-               ixz="0.0"
-               iyy="0.145833"
-               iyz="0.0"
-               izz="0.125"/>
-      </inertial>
+      <mass value="0.5"/>
+      <inertia
+        ixx="0.001"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.001"
+        iyz="0.0"
+        izz="0.0015"/>
+    </inertial>
   </link>
 
   <joint name="caster_joint" type="fixed">
-    <origin xyz="-0.957138 -0 0.2" rpy="0 0 0"/>
+    <origin xyz="-0.3 0 -0.1" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="caster"/>
   </joint>
@@ -193,27 +195,27 @@
   <link name="caster">
     <collision>
       <geometry>
-        <sphere radius="0.2"/>
+        <sphere radius="0.1"/>
       </geometry>
     </collision>
 
     <visual>
       <geometry>
-        <sphere radius="0.2"/>
+        <sphere radius="0.1"/>
       </geometry>
       <material name="white"/>
     </visual>
 
     <inertial>
-      <origin xyz="-0.957138 -0 0.2" rpy="0 0 0"/>
-      <mass value="0.2"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.5"/>
       <inertia
-        ixx="0.1"
+        ixx="0.01"
         ixy="0.0"
         ixz="0.0"
-        iyy="0.1"
+        iyy="0.01"
         iyz="0.0"
-        izz="0.1"/>
+        izz="0.01"/>
     </inertial>
   </link>
 
