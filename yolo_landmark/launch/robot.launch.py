@@ -1,19 +1,36 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, OpaqueFunction, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch.actions import ExecuteProcess
+
 
 def generate_launch_description():
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     pkg_share = FindPackageShare(package='yolo_landmark')
-    
     sdf_path = PathJoinSubstitution([pkg_share, 'sdf', 'robot.sdf'])
     rviz_config_path = PathJoinSubstitution([pkg_share, 'config', 'robot.rviz'])
     world_path = PathJoinSubstitution([pkg_share, 'worlds', 'world.world'])
     slam_params_file = PathJoinSubstitution([pkg_share, 'config', 'slam_toolbox_params.yaml'])
     nav2_params_file = PathJoinSubstitution([pkg_share, 'config', 'nav2_params.yaml'])
+
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        arguments=['-d', rviz_config_path],
+        output='screen',
+        parameters=[use_sim_time],
+    )
+
+    save_map_action = ExecuteProcess(
+        cmd=['ros2', 'service', 'call', '/slam_toolbox/save_map', 
+            'slam_toolbox/srv/SaveMap', '"{name: {data: \'my_map\'}}"'],
+        shell=True
+    )
 
     def robot_state_publisher(context):
         robot_description_content = Command([
@@ -34,8 +51,6 @@ def generate_launch_description():
             parameters=[robot_description]
         )
         return [node_robot_state_publisher]
-    
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
 
     gz_spawn_entity = Node(
         package='ros_gz_sim',
@@ -177,14 +192,7 @@ def generate_launch_description():
                 'use_sim_time': 'true'}.items(),
         ),
 
-        Node(   
-            package='rviz2',
-            executable='rviz2',
-            name='rviz2',
-            arguments=['-d', rviz_config_path],
-            output='screen',
-            parameters=[use_sim_time],
-        ),
+        rviz_node,
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
@@ -198,5 +206,12 @@ def generate_launch_description():
                 'slam_params_file': slam_params_file,
                 'use_sim_time': use_sim_time
             }.items(),
+        ),
+
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=rviz_node,
+                on_exit=[save_map_action],
+            )
         )
     ])
