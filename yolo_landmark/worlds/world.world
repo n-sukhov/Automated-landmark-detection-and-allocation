@@ -14,6 +14,11 @@
     <magnetic_field>5.5644999999999998e-06 2.2875799999999999e-05 -4.2388400000000002e-05</magnetic_field>
     <atmosphere type='adiabatic'/>
 
+    <include>
+      <uri>https://fuel.ignitionrobotics.org/1.0/openrobotics/models/Sonoma Raceway</uri>
+      <pose>-278.08 134.22 -7.4 0 0 0</pose>
+    </include>
+    
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
       <pose>0 0 10 0 0 0</pose>
@@ -28,58 +33,31 @@
       <direction>-0.5 0.1 -0.9</direction>
     </light>
 
-    <model name="ground_plane">
-      <static>true</static>
-      <link name="link">
-        <collision name="collision">
-          <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>100 100</size>
-            </plane>
-          </geometry>
-        </collision>
-        <visual name="visual">
-          <geometry>
-            <plane>
-              <normal>0 0 1</normal>
-              <size>100 100</size>
-            </plane>
-          </geometry>
-          <material>
-            <ambient>0.8 0.8 0.8 1</ambient>
-            <diffuse>0.8 0.8 0.8 1</diffuse>
-            <specular>0.8 0.8 0.8 1</specular>
-          </material>
-        </visual>
-      </link>
-    </model>
-    
     <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Oak tree</uri>
       <name>oak_tree</name>
-      <pose>5.0 5.5 0 0 0 0</pose>
+      <pose>-130.0 70.5 4 0 0 0</pose>
       <static>true</static>
     </include>
 
     <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person</uri>
       <name>person</name>
-      <pose>6.0 -3.5 0 0 0 1</pose>
+      <pose>6.0 -4 0 0 0 1</pose>
       <static>true</static>
     </include>
 
     <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person</uri>
       <name>person2</name>
-      <pose>4.0 0.0 0 0 0 2</pose>
+      <pose>-30 -3 0.6 0 0 2</pose>
       <static>true</static>
     </include>
-    
+
     <include>
       <uri>https://fuel.gazebosim.org/1.0/Bramosa/models/x500</uri>
       <name>copter</name>
-      <pose>5.0 0.3 0 0 0 0</pose>
+      <pose>5.0 0.3 1.1 0 0 0</pose>
       <static>true</static>
     </include>
   </world>

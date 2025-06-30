@@ -6,11 +6,15 @@ from ultralytics import YOLO
 from visualization_msgs.msg import Marker, MarkerArray
 import math
 import numpy as np
+from tf2_ros import Buffer, TransformListener, LookupException, ConnectivityException, ExtrapolationException
+from geometry_msgs.msg import PointStamped
+import tf2_geometry_msgs
+from rclpy.time import Time as RclpyTime
 
 def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
-    if abs(array[idx] - value) > 0.2:
+    if abs(array[idx] - value) > 0.05:
         return None
     return idx
 
@@ -19,6 +23,8 @@ class YOLOLandmarkNode(Node):
         super().__init__('yolo_landmark_node')
         self.model = YOLO('yolov8n.pt')
         self.bridge = CvBridge()
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
 
         self.subscription = self.create_subscription(
             Image,
@@ -50,8 +56,26 @@ class YOLOLandmarkNode(Node):
 
     def scan_callback(self, msg):
         self.last_scan = msg
+        
+    def transform_to_map(self, x, y, z):
+        try:
+            point = PointStamped()
+            point.header.frame_id = "lidar_link"
+            point.header.stamp = RclpyTime(seconds=0).to_msg() 
+            point.point.x = x
+            point.point.y = y
+            point.point.z = z
 
-    def is_near_existing_object(self, class_name, x, y, threshold=0.1):
+            transformed_point = self.tf_buffer.transform(
+                point, "map", timeout=rclpy.duration.Duration(seconds=0.5)
+                )
+            return transformed_point.point.x, transformed_point.point.y, transformed_point.point.z
+        
+        except (LookupException, ConnectivityException, ExtrapolationException) as e:
+            self.get_logger().warn(f"TF transform failed: {str(e)}")
+            return None
+
+    def is_near_existing_object(self, class_name, x, y, threshold=50):
         if class_name not in self.object_positions:
             return False
             
@@ -103,9 +127,15 @@ class YOLOLandmarkNode(Node):
                         if not math.isfinite(distance):
                             continue
 
-                        x = distance * math.cos(angle)
-                        y = - distance * math.sin(angle)
-                        z = 0.0
+                        odom_x = distance * math.cos(angle)
+                        odom_y = - distance * math.sin(angle)
+                        odom_z = 0.0
+
+                        map_coords = self.transform_to_map(odom_x, odom_y, odom_z)
+                        if map_coords is None:
+                            continue
+                        x, y, z = map_coords
+
 
                         if self.is_near_existing_object(class_name, x, y):
                             continue
@@ -113,7 +143,7 @@ class YOLOLandmarkNode(Node):
                         self.update_object_positions(class_name, x, y)
 
                         marker = Marker()
-                        marker.header.frame_id = "odom"
+                        marker.header.frame_id = "map"
                         marker.header.stamp = self.get_clock().now().to_msg()
                         marker.id = self.current_marker_id
                         marker.type = Marker.SPHERE
@@ -133,7 +163,7 @@ class YOLOLandmarkNode(Node):
                         self.current_marker_id += 1
 
                         text_marker = Marker()
-                        text_marker.header.frame_id = "odom"
+                        text_marker.header.frame_id = "map"
                         text_marker.header.stamp = self.get_clock().now().to_msg()
                         text_marker.id = self.current_marker_id
                         text_marker.type = Marker.TEXT_VIEW_FACING
@@ -152,7 +182,7 @@ class YOLOLandmarkNode(Node):
                         self.current_marker_id += 1
 
                         self.get_logger().info(
-                            f"Published object point at angle {round(math.degrees(angle), 1)}°: ({round(x, 2)}, {round(y, 2)})"
+                            f"Published object point at ({round(x, 2)}, {round(y, 2)})"
                         )
 
             self.marker_array.markers.extend(new_markers.markers)
